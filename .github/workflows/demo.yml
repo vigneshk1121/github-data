@@ -19,7 +19,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     outputs:
-      script-file-name: ${{ steps.JSFileName}}
+      script-file: ${{ steps.publish.outputs.script-file}}
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -34,9 +34,10 @@ jobs:
         uses: actions/upload-artifact@v3 #after the build is performed, trying to upload the artifacts to the github storage
         with:
           name: dist-files
-          path: | # specifies the path of the contents which needs to be uploaded
-            dist
-            package.json
+          path: dist
+          # path: | # specifies the path of the contents which needs to be uploaded
+          #   dist
+          #   package.json
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -47,5 +48,7 @@ jobs:
           name: dist-files
       - name: Output Contents
         run: ls
+      - name: Output File name
+        run: echo "${{needs.build.outputs.script-file}}"
       - name: Deploy
         run: echo "Deploying..."
