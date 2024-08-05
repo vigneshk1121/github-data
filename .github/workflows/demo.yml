@@ -9,11 +9,11 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
-      - name: Cache NPM Dependencies
-        uses: actions/cache@v3
+      - name: Cache NPM Dependencies #caching the npm dependencies as it is used in many jobs and time consuming
+        uses: actions/cache@v3 # action tag for caching
         with:
-          path: ~/.npm
-          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm  # path where the dependencies are available
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }} # some random name that can hold the dependencies
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -23,12 +23,12 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
-    outputs:
-      js-file-name: ${{ steps.JSFileName.outputs.file-name}}
+    outputs: # outputs a value from a job step
+      js-file-name: ${{ steps.JSFileName.outputs.file-name}}  #pick the value from the id and find the output detail
     steps:
       - name: Get code
         uses: actions/checkout@v3
-      - name: Cache NPM Dependencies
+      - name: Cache NPM Dependencies # cache code needs to be replicated, whenever the cache command executes it will try to find from the cache memore
         uses: actions/cache@v3
         with:
           path: ~/.npm
@@ -38,12 +38,16 @@ jobs:
       - name: Build website
         run: npm run build
       - name: Publish JS filename
-        id: JSFileName
-        run: find dist/assets/*.js -type f -execdir echo 'file-name={}' >> $GITHUB_OUTPUT ';'
+        id: JSFileName # id which needs to be matched for output attribute
+        run: find dist/assets/*.js -type f -execdir echo 'file-name={}' >> $GITHUB_OUTPUT ';' 
+          # finds the js file from asset
+          # find only inside the directlyr -type f -execdir
+          # '{}' ';' --> output to that path
+          # 'file-name={}' >> $GITHUB_OUTPUT ';' output as file name and the value would be GITHUB_OUTPUT
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3 #after the build is performed, trying to upload the artifacts to the github storage
         with:
-          name: dist-files
+          name: dist-files  #name of the upload conetnt, this needs to be used while download
           path: dist
           # path: | # specifies the path of the contents which needs to be uploaded
           #   dist
@@ -52,10 +56,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Get Build Artifacts
+      - name: Get Build Artifacts   # dwonload the artifcat contents from the uploaded entries
         uses: actions/download-artifact@v3
         with:
-          name: dist-files
+          name: dist-files #the name with which it will find the output directory that needs to be downloaded
       - name: Output Contents
         run: ls
       - name: Output File name
