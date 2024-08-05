@@ -19,7 +19,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     outputs:
-      script-file: ${{ steps.JSFileName.outputs.script-file}}
+      js-file-name: ${{ steps.JSFileName.outputs.file-name}}
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -29,7 +29,7 @@ jobs:
         run: npm run build
       - name: Publish JS filename
         id: JSFileName
-        run: find dist/assets/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';'
+        run: find dist/assets/*.js -type f -execdir echo 'file-name={}' >> $GITHUB_OUTPUT ';'
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3 #after the build is performed, trying to upload the artifacts to the github storage
         with:
@@ -49,6 +49,6 @@ jobs:
       - name: Output Contents
         run: ls
       - name: Output File name
-        run: echo "${{needs.build.outputs.script-file}}"
+        run: echo "${{needs.build.outputs.js-file-name}}"
       - name: Deploy
         run: echo "Deploying..."
